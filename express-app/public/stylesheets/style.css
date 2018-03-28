@@ -1,0 +1,49 @@
+body{
+ background-color: grey;
+}
+.jumbotron{
+    background-color: orange;
+    color: purple;
+    /*align-content: center;*/
+}
+#button1{
+    background-color: lightgreen;
+    color: black;
+}
+#swimlanes{
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: scroll;
+}
+.swimlane {
+    border: 2px solid blue;
+    width: 200px;
+    height: 100vh;
+    background-color: lightblue;
+    overflow: scroll; 
+    margin-left: 50px; 
+    margin-top: 20px;
+    padding-left: 10px;
+}
+.icons{
+    margin: 20px;
+}
+.card{
+    min-height:200px; 
+    /*margin: 10px;*/
+    background-color: white;
+    border: 2px solid yellow;
+    border-radius: 5px;
+    margin: 5px;
+}
+.card-white{
+    background-color: white;
+}
+.card .description{
+    padding-left: 15px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    color: black;
+    height:auto;
+    overflow: auto;
+}
