@@ -13,7 +13,7 @@ server.use(restify.plugins.queryParser());
 server.use(restify.plugins.bodyParser());
 
 //setup the mysql configuration
-const sql = new Sequelize('trello', 'root', '!Mysql99', {
+const sql = new Sequelize('trello', 'root', 'danae123', {
 	host: 'localhost',
 	port: 3306,
 	dialect: 'mysql',
@@ -67,7 +67,7 @@ sql.sync();
 // let swimlanes = [{
 // 		"id": 1,
 // 		"name": "swimlane 1",
-		
+
 // 	},
 // 	{
 // 		"id": 2,
@@ -136,7 +136,7 @@ function getCards(req, res, next) {
 function postSwimlane(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	
+
 	console.log(req.body);
 
 	Swimlane.create({
@@ -156,7 +156,7 @@ function postSwimlane(req, res, next) {
 function postCard(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	
+
 	console.log(req.body);
 
 	Swimlane.findAll({
@@ -175,7 +175,7 @@ function postCard(req, res, next) {
 	});
 
 
-	
+
 
 	// var card = new Card(req.body.id, req.body.swimlane_id, req.body.name, req.body.cardDescription);
 
@@ -190,15 +190,15 @@ function postCard(req, res, next) {
 function getCardsBySwimlaneId (req, res, next){
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
-	
+
 	console.log(req.params)
-	
+
 	Card.findAll({
   		include: [{
         	model: Swimlane,
         	where: { id: req.params.swimlane_id }
     	}]
- 		
+
 	})
 	.then ((cards) => {
 		res.send(cards);
