@@ -1,0 +1,26 @@
+html
+  head
+    meta(charset='UTF-8')
+    |     
+    title Trello-Project
+    |     
+    link(rel='stylesheet', type='text/css', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css')
+    |     
+    script(defer='', src='https://use.fontawesome.com/releases/v5.0.6/js/all.js')
+    |     
+    script(src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js')
+    |     
+    link(rel='stylesheet', href='https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css')
+    |     
+    script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.js')
+    |     
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    |
+    script(src='/javascripts/scripts.js')
+
+  body
+    .jumbotron.jumbotron-fluid
+      .container
+        h1.display-4 Trello Application
+        a(href='/boards') Boards
+block content

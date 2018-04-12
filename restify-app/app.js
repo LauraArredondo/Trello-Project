@@ -36,7 +36,7 @@ sql
 		console.log("There was an error when connecting!");
 	});
 
-
+//***set up Board create id and name
 //set up swimlane table
 var Swimlane = sql.define('swimlane', {
 	id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
@@ -44,7 +44,7 @@ var Swimlane = sql.define('swimlane', {
 });
 
 
-//***set up card table
+//set up card table
 var Card = sql.define('card', {
 	id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
 	name: { type: Sequelize.STRING },
@@ -52,8 +52,8 @@ var Card = sql.define('card', {
 });
 
 
-
-//***set up sql associations
+//****simlane belongs to Board
+//set up sql associations
 Card.Swimlane = Card.belongsTo(Swimlane);
 
 sql.sync();
@@ -62,33 +62,6 @@ sql.sync();
 // sql.sync({ force: true }).then(() => {
 // 	getSwimlanes();
 // });
-
-// //static swimlanes to make sure render on page when command lines express/restify started, localhost:3000
-// let swimlanes = [{
-// 		"id": 1,
-// 		"name": "swimlane 1",
-
-// 	},
-// 	{
-// 		"id": 2,
-// 		"name": "swimlane 2",
-// 	}
-// ];
-
-// //static cards rendering on webpage
-// let cards = [{
-// 		"id": 1,
-// 		"swimlane_id": 1,
-// 		"name": "card 1",
-// 		"cardDescription": "description 1"
-// 	},
-// 	{
-// 		"id": 2,
-// 		"swimlane_id": 2,
-// 		"name": "card 2",
-// 		"cardDescription" : "description 2"
-// 	}
-// ];
 
 // //Constructor for swimlanes
 // var Swimlane = function(id, name){
@@ -103,6 +76,8 @@ sql.sync();
 // 	this.name = name;
 // 	this.cardDescription = cardDescription;
 // }
+
+//****function needed to getBoards
 
 //gets swimlanes passing in request, response, next [where does it use them]
 function getSwimlanes(req, res, next) {
@@ -131,6 +106,8 @@ function getCards(req, res, next) {
 	});
 	// res.send(cards);
 }
+
+//****function to post Boards
 
 //posts swimlanes passing in request, response, next
 function postSwimlane(req, res, next) {
@@ -187,6 +164,8 @@ function postCard(req, res, next) {
 }
 
 
+//****function for get swimlanes by BoardId
+
 function getCardsBySwimlaneId (req, res, next){
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -205,6 +184,8 @@ function getCardsBySwimlaneId (req, res, next){
 	});
 }
 
+
+//****function to update BoardById
 
 function updateSwimlaneById (req, res, next) {
 res.header("Access-Control-Allow-Origin", "*");
@@ -242,6 +223,8 @@ card.name = name;
 res.send(card);
 }
 
+
+//****do same gets and posts for Boards
 
 // Set up our routes and start the server
 server.get('/swimlanes', getSwimlanes);

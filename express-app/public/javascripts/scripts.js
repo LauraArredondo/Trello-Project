@@ -1,3 +1,5 @@
+//**** need ready for render boards and takes you to home page with button to handle onclick
+
 $('document').ready(function() {
     renderExistingSwimlanes();
    
@@ -11,6 +13,8 @@ $('document').ready(function() {
 var newSwimlane;
 // var swimlaneNumber;
 // var idSwimlane;
+
+//**** need render Boards
 
 function renderExistingSwimlanes() {
     $.ajax({
@@ -47,6 +51,8 @@ function renderExistingCards(swimlaneId) {
         });
 }
 
+//****not sure this function is needed
+
 function getNewId(){
     var date = new Date();
     var id = date.getTime();
@@ -55,6 +61,8 @@ function getNewId(){
 
     return id;
 }
+
+//***need function drawBoard
 
 function drawSwimlane(id, name) {
     newSwimlane = $('<div id="' + id +'" class="swimlane"></div>');
@@ -74,6 +82,8 @@ function drawSwimlane(id, name) {
             otherSwimlane.css("zIndex", 0);
         }
     });
+
+
     var swimlaneHeader = $('<div class="swimlaneHeader">' + name + '</div>');
 
     newSwimlane.append(swimlaneHeader);
@@ -139,6 +149,8 @@ function drawCard(swimlaneId, name, cardDescription, card_id) {
     });
     }
 
+//*** need function to save Board
+
 function saveSwimlane(swimlane) {
     $.ajax({
             method: "POST",
@@ -151,6 +163,8 @@ function saveSwimlane(swimlane) {
         });
 }
 
+//**** need function to update Board
+
 function updateSwimlane(id, name) {
   $.ajax({
             method: "POST",
@@ -161,6 +175,7 @@ function updateSwimlane(id, name) {
             alert("Swimlane Update: " + swimlane);
         });  
 }
+
 
 function updateCardName(id, name) {
   $.ajax({
