@@ -3,7 +3,7 @@
 $('document').ready(function() {
     renderExistingBoards();
    
-    $('button#boardButton').on('click', function() {
+    $('#boardButton').on('click', function() {
         var boardName = prompt('New board name');
         var id = saveBoard({name: boardName}); 
         drawBoard(id, boardName);  
@@ -12,6 +12,7 @@ $('document').ready(function() {
 
 
 //**** render Boards
+
 
 function renderExistingBoards() {
     $.ajax({
@@ -49,7 +50,11 @@ function getNewId(){
 //***function drawBoard
 
 function drawBoard(id, name) {
-    newBoard = $('<div id="' + id +'" class="board"></div>');
+    var newBoard = $('<div id="' + id +'" class="board"></div>');
+    newBoard.on('click', function() {
+        // ***send the user to the swimlane page for this board
+     	window.location.href = "/swimlanes?id=" + id;
+     });
 
     newBoard.draggable({
         start: function() {
@@ -72,7 +77,7 @@ function drawBoard(id, name) {
 
     newBoard.append(boardHeader);
   
-    var buttons = $('<div class="buttons"><i class="fas fa-trash-alt icons"></i><i class="fas fa-pencil-alt icons"></i><i class="fas fa-plus icons"></i></div>');
+    var buttons = $('<div class="buttons"><i class="fas fa-trash-alt icons"></i><i class="fas fa-pencil-alt icons"></i></div>');
 
     newBoard.append(buttons);
 
@@ -87,15 +92,15 @@ function drawBoard(id, name) {
       updateBoard(id,newName);
     });
 
-    buttons.on('click', '.fa-plus', function() {
-        var swimlaneHeader = prompt('New swimlane name');
-        var swimlaneDescription = prompt('New swimlane description');
-        var swimlaneId = getNewId();
-        //****drawSwimlaneDescription(id, SwimlaneDescription); 
-        drawSwimlane(id, swimlaneHeader, swimlaneId);
-         //save description function needed   
-        saveSwimlane({id: swimlaneId, boardId: id, name: swimlaneHeader});
-     })
+    // buttons.on('click', '.fa-plus', function() {
+    //     var swimlaneHeader = prompt('New swimlane name');
+    //     var swimlaneDescription = prompt('New swimlane description');
+    //     var swimlaneId = getNewId();
+    //     //****drawSwimlaneDescription(id, SwimlaneDescription); 
+    //     drawSwimlane(id, swimlaneHeader, swimlaneId);
+    //      //save description function needed   
+    //     saveSwimlane({id: swimlaneId, boardId: id, name: swimlaneHeader});
+    //  })
 
     $('#boards').append(newBoard);
 }

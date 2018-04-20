@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    |
+    section
+      .d-flex.justify-content-center
+        button#swimlaneButton.btn.btn-primary.border.border-dark.mr-3.mt-3.ml-3(type='button')  New Swimlane
+    |
+    h2#boardTitle
+    |     
+    #swimlanes
+    | 
+    script(src='/javascripts/swimlanes.js')    

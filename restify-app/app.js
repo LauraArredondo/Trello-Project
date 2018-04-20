@@ -37,6 +37,11 @@ sql
 	});
 
 //***set up Board create id and name
+var Board = sql.define('board', {
+	id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
+	name: { type: Sequelize.STRING }
+});
+
 //set up swimlane table
 var Swimlane = sql.define('swimlane', {
 	id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
@@ -52,9 +57,13 @@ var Card = sql.define('card', {
 });
 
 
-//****simlane belongs to Board
-//set up sql associations
-Card.Swimlane = Card.belongsTo(Swimlane);
+//****swimlane belongs to Board
+//set up sql associations creates a function called setBoard
+Swimlane.belongsTo(Board);
+Board.hasMany(Swimlane);
+
+Card.belongsTo(Swimlane);
+Swimlane.hasMany(Card);
 
 sql.sync();
 
@@ -78,6 +87,19 @@ sql.sync();
 // }
 
 //****function needed to getBoards
+function getBoards(req, res, next) {
+	// Restify currently has a bug which doesn't allow you to set default headers
+	// These headers comply with CORS and allow us to serve our response to any origin
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+	//find the appropriate data
+	Board.findAll().then((boards) => {
+		res.send(boards);
+	});
+	// res.send(swimlanes);
+}
+
 
 //gets swimlanes passing in request, response, next [where does it use them]
 function getSwimlanes(req, res, next) {
@@ -108,6 +130,25 @@ function getCards(req, res, next) {
 }
 
 //****function to post Boards
+function postBoard(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+	console.log(req.body);
+
+	Board.create({
+		name: req.body.name
+	}).then((board) => {
+		res.send(board);
+	});
+
+	// var swimlane = new Swimlane(req.body.id, req.body.name);
+
+	// swimlanes.push(swimlane);
+
+	// res.send(swimlane);
+}
+
 
 //posts swimlanes passing in request, response, next
 function postSwimlane(req, res, next) {
@@ -116,17 +157,19 @@ function postSwimlane(req, res, next) {
 
 	console.log(req.body);
 
-	Swimlane.create({
-		name: req.body.name
-	}).then((swimlane) => {
-		res.send(swimlane);
+	Board.findAll({
+  		where: {
+    		id: req.body.boardId
+  		}
+	})
+	.then((boards) => {
+		Swimlane.create({
+			name: req.body.name
+		}).then((swimlane) => {
+			swimlane.setBoard(boards[0]);
+			res.send(swimlane);
+		});
 	});
-
-	// var swimlane = new Swimlane(req.body.id, req.body.name);
-
-	// swimlanes.push(swimlane);
-
-	// res.send(swimlane);
 }
 
 //***posts cards passing in request, response, next - needs to know from ajax in express lower case swimlane id
@@ -183,8 +226,40 @@ function getCardsBySwimlaneId (req, res, next){
 		res.send(cards);
 	});
 }
+//****Get Board by Id
+function getBoardById (req, res, next){
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
 
+	console.log(req.params)
 
+	Board.find({
+  	
+        where: { id: req.params.board_id }
+    })
+	.then ((board) => {
+		res.send(board);
+	});
+}
+
+//function to get swimlanes by Board Id
+function getSwimlanesByBoardId (req, res, next){
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+	console.log(req.params)
+
+	Swimlane.findAll({
+  		include: [{
+        	model: Board,
+        	where: { id: req.params.board_id }
+    	}]
+
+	})
+	.then ((swimlanes) => {
+		res.send(swimlanes);
+	});
+}
 //****function to update BoardById
 
 function updateSwimlaneById (req, res, next) {
@@ -227,6 +302,13 @@ res.send(card);
 //****do same gets and posts for Boards
 
 // Set up our routes and start the server
+server.get('/boards/:board_id', getBoardById);
+
+
+server.get('/boards', getBoards);
+server.post('/boards', postBoard);
+
+server.get('/boards/:board_id/swimlanes', getSwimlanesByBoardId);
 server.get('/swimlanes', getSwimlanes);
 server.post('/swimlanes', postSwimlane);
 

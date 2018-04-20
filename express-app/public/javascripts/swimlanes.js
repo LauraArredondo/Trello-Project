@@ -1,11 +1,20 @@
 //**** need ready for render boards and takes you to home page with button to handle onclick
+var boardId;
 
 $('document').ready(function() {
+
+//****get id from url query string parameters and assign to board ID 
+    boardId = getQueryVariable("id");
+
+    console.log(boardId);
+    
+    renderBoard(boardId);
+
     renderExistingSwimlanes();
    
-    $('button').on('click', function() {
+    $('#swimlaneButton').on('click', function() {
         var swimlaneName = prompt('New swimlane name');
-        var id = saveSwimlane({name: swimlaneName}); 
+        var id = saveSwimlane({name: swimlaneName, boardId:boardId}); 
         drawSwimlane(id, swimlaneName);  
     });
 });
@@ -16,10 +25,27 @@ var newSwimlane;
 
 //**** need render Boards
 
+function renderBoard(id) {
+ $.ajax({
+            method: "GET",
+            url: "http://localhost:8080/boards/" + id,
+            
+        })
+        .done(function(board) {
+            setBoardTitle(board);
+        });
+}
+
+function setBoardTitle (board) {
+    $('#boardTitle').text(board.name);
+}
+
 function renderExistingSwimlanes() {
     $.ajax({
             method: "GET",
-            url: "http://localhost:8080/swimlanes",
+ 
+    //****only for the particular board ID
+            url: "http://localhost:8080/boards/" + boardId + "/swimlanes",
 
         })
         .done(function(swimlanes) {
@@ -92,6 +118,11 @@ function drawSwimlane(id, name) {
 
     newSwimlane.append(buttons);
 
+//****new code to try to account for boardId
+
+    // $("#"+ boardId).append(newSwimlane);
+
+ 
     buttons.on('click', '.fa-trash-alt', function() {
         $(this).closest('.swimlane').remove();
 
@@ -198,4 +229,17 @@ function saveCard(card) {
         .done(function(card) {
             alert("Card Saved: " + card);
         });
+}
+
+//****New function to get Board URL
+
+function getQueryVariable(variable)
+{
+       var query = window.location.search.substring(1);
+       var vars = query.split("&");
+       for (var i=0;i<vars.length;i++) {
+               var pair = vars[i].split("=");
+               if(pair[0] == variable){return pair[1];}
+       }
+       return(false);
 }

@@ -7,8 +7,8 @@ router.get('/', function(req, res, next) {
 });
 
 //****get boards home page
-router.get('/boards', function(req, res, next) {
-  res.render('boards', { title: 'Express' });
+router.get('/swimlanes', function(req, res, next) {
+  res.render('swimlanes', { title: 'Express' });
 });
 
 module.exports = router;
