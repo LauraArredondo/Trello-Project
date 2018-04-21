@@ -1,7 +1,7 @@
 //this is definitely standard
 //standard protocol to require restify
-const restify = require('restify');
-const server = restify.createServer();
+var restify = require('restify');
+var server = restify.createServer();
 
 //additional sequelize code
 const Sequelize = require("sequelize");
@@ -38,14 +38,14 @@ sql
 
 
 //set up swimlane table
-var Swimlane = sql.define('swimlane', {
+var Swimlane = sql.define('swimlanes', {
 	id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
 	name: { type: Sequelize.STRING }
 });
 
 
 //***set up card table
-var Card = sql.define('card', {
+var Card = sql.define('cards', {
 	id: { type: Sequelize.UUID, primaryKey: true, defaultValue: Sequelize.UUIDV4 },
 	name: { type: Sequelize.STRING },
 	cardDescription: { type: Sequelize.STRING }
@@ -54,7 +54,9 @@ var Card = sql.define('card', {
 
 
 //***set up sql associations
-Card.Swimlane = Card.belongsTo(Swimlane);
+//Card.Swimlane = Card.belongsTo(Swimlane);
+Swimlane.hasMany(Card);
+Card.belongsTo(Swimlane);
 
 sql.sync();
 
@@ -112,8 +114,8 @@ function getSwimlanes(req, res, next) {
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
 
 	//find the appropriate data
-	Swimlane.findAll().then((swimlanes) => {
-		res.send(swimlanes);
+	Swimlane.findAll().then((Swimlane) => {
+		res.send(Swimlane);
 	});
 	// res.send(swimlanes);
 }
@@ -126,8 +128,8 @@ function getCards(req, res, next) {
 	res.header("Access-Control-Allow-Headers", "X-Requested-With");
 
 	//find the appropriate data
-	Card.findAll().then((cards) => {
-		res.send(cards);
+	Card.findAll().then((Card) => {
+		res.send(Card);
 	});
 	// res.send(cards);
 }
@@ -140,17 +142,18 @@ function postSwimlane(req, res, next) {
 	console.log(req.body);
 
 	Swimlane.create({
+		id: req.body.id,
 		name: req.body.name
 	}).then((swimlane) => {
 		res.send(swimlane);
 	});
-
+}
 	// var swimlane = new Swimlane(req.body.id, req.body.name);
 
 	// swimlanes.push(swimlane);
 
 	// res.send(swimlane);
-}
+
 
 //***posts cards passing in request, response, next - needs to know from ajax in express lower case swimlane id
 function postCard(req, res, next) {
@@ -159,24 +162,20 @@ function postCard(req, res, next) {
 
 	console.log(req.body);
 
-	Swimlane.findAll({
+	Swimlane.find({
   		where: {
-    		id: req.body.swimlaneId
-  		}
+    		id: req.body.swimlane_id}
 	})
-	.then((swimlanes) => {
+	.then((swimlane) => {
 		Card.create({
+			id: req.body.id,
 			name: req.body.name,
 			cardDescription: req.body.cardDescription
 		}).then((card) => {
-			card.setSwimlane(swimlanes[0]);
+			card.setSwimlane(swimlane);
 			res.send(card);
 		});
 	});
-
-
-
-
 	// var card = new Card(req.body.id, req.body.swimlane_id, req.body.name, req.body.cardDescription);
 
 	// cards.push(card);
@@ -194,15 +193,11 @@ function getCardsBySwimlaneId (req, res, next){
 	console.log(req.params)
 
 	Card.findAll({
-  		include: [{
-        	model: Swimlane,
-        	where: { id: req.params.swimlane_id }
-    	}]
-
-	})
-	.then ((cards) => {
-		res.send(cards);
-	});
+            where: { swimlaneId: req.params.swimlane_id }
+        })
+        .then((Card) => {
+            res.send(Card);
+        });
 }
 
 
@@ -210,49 +205,124 @@ function updateSwimlaneById (req, res, next) {
 res.header("Access-Control-Allow-Origin", "*");
 res.header("Access-Control-Allow-Headers", "X-Requested-With");
 //get swimlaneid from url
-var swimlane_id = req.params.swimlane_id;
+var swimlaneId = req.params.swimlane_id;
 //get newswimlane name from body
 var name = req.body.name;
 //find swimlane by swimlane id
-var swimlane = swimlanes.find(function(swimlane){
-	return swimlane.id == swimlane_id;
-});
-//update swimlanes name property
-swimlane.name = name;
+Swimlane.find({
+        where: { id: swimlaneId }
+    }).then((swimlane) => {
+        if (swimlane) {
+	//update name for swimlane
+            swimlane.updateAttributes({
+                name: name
+            })
+        }
 //return swimlane to caller
-res.send(swimlane);
+        res.send(swimlane);
+    });
 }
 
 
 //need to change names to card
-function updateCardNameById (req, res, next) {
+function updateCardById (req, res, next) {
 res.header("Access-Control-Allow-Origin", "*");
 res.header("Access-Control-Allow-Headers", "X-Requested-With");
 //get swimlaneid from url
 var card_id = req.params.card_id;
 //get newswimlane name from body
-var name = req.body.name;
-//find swimlane by swimlane id
-var card = cards.find(function(card){
-	return card.id == card_id;
-});
-//update card name property
-card.name = name;
-//return card to caller
-res.send(card);
+Card.find({
+        where: { id: card_id }
+    }).then((card) => {
+        if (card) {
+	//update card name property
+            if (req.body.name) {
+                card.updateAttributes({
+                    name: req.body.name
+                });
+            }
+            if (req.body.description) {
+                card.updateAttributes({
+                    cardDescription: req.body.description
+                });
+            }
+        }
+	//return card to caller
+        res.send(card);
+    });
+}
+
+function removeSwimlane(req, res, next){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+    // get swimlaneId from URL
+    var swimlaneId = req.params.swimlane_id;
+    var card_id = req.params.card_id;
+
+
+    Swimlane.find({
+        where: { id: swimlaneId }
+    }).then((swimlane) => {
+
+    	var cards = swimlane.getCards().then((cards) => {
+    		for(var i = 0; i < cards.length; i++){
+    			cards[i].destroy();
+    		}
+
+        	swimlane.destroy();
+    	});
+    	res.send(200);
+	});
+}
+
+function removeCards(req, res, next){
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+
+    var card_id = req.params.card_id;
+
+    Card.find({
+        where: { id: card_id }
+    }).then((card) => {
+
+        card.destroy();
+    });
+
+    res.send(200);
 }
 
 
 // Set up our routes and start the server
+server.opts('/swimlanes/:swimlane_id', (req, res) =>{
+    res.setHeader('Access-Control-Allow-Origin', "*");
+    res.setHeader('Access-Control-Allow-Headers', 'Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.send(200);
+});
+
+server.opts('/swimlanes/cards/:card_id', (req, res) =>{
+    res.setHeader('Access-Control-Allow-Origin', "*");
+    res.setHeader('Access-Control-Allow-Headers', 'Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.send(200);
+});
+
 server.get('/swimlanes', getSwimlanes);
 server.post('/swimlanes', postSwimlane);
 
 server.get('/swimlanes/:swimlane_id/cards', getCardsBySwimlaneId);
 server.post('/swimlanes/:swimlane_id', updateSwimlaneById);
 
+
 server.get('/cards', getCards);
 server.post('/cards', postCard);
-server.post('/swimlanes/cards/:card_id', updateCardNameById)
+server.post('/swimlanes/cards/:card_id', updateCardById)
+
+
+server.del('/swimlanes/:swimlane_id', removeSwimlane);
+server.del('/swimlanes/cards/:card_id', removeCards);
 
 server.listen(8080, function() {
 	console.log('%s listening at %s', server.name, server.url);
